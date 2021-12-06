@@ -27,7 +27,7 @@ namespace RR
 
 		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
 		{
-			if (!Rand.MTBEventOccurs(Props.mtbDays, RebeccaSettings.MTBUnit, RebeccaSettings.MTBCheckDuration))
+			if (!Rand.MTBEventOccurs(Props.mtbDays, RebeccaSettings.MTBUnit, 1000f))
 			{
 				RebeccaLog("Rebecca has decided to send nothing..");
 				return blankList;
