@@ -19,10 +19,10 @@ namespace RR
 
 		protected StorytellerCompProperties_Realistic Props => (StorytellerCompProperties_Realistic)props;
 
-		public void RebeccaLog(string message)
+		public static void RebeccaLog(string message)
         {
 			if (RebeccaSettings.LoggingEnabled)
-				Log.Message("[UdderlyEvelyn.RebeccaRealistic][" + DateTime.Now.ToShortTimeString() + "] " + message);
+				Log.Message("[" + DateTime.Now.ToShortTimeString() + "] " + message);
 		}
 
 		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
@@ -54,19 +54,43 @@ namespace RR
 			}
 			//The rest
 			var iCatDef = Props.categoryWeights.RandomElementByWeight(cw => cw.weight).category;
-			return new FiringIncident[] { GetRandomWeightedIncidentFromCategory(iCatDef, target) };
+			var incident = GetRandomWeightedIncidentFromCategory(iCatDef, target);
+			RebeccaLog("Rebecca is sending \"" + incident.def.defName + "\" right now!");
+			return new FiringIncident[] { incident };
 		}
 
 		public void SendRandomWeightedIncidentFromCategory(IncidentCategoryDef iCatDef, IIncidentTarget target, int minTicks = 1250, int maxTicks = 2500)
         {
-			Current.Game.storyteller.incidentQueue.Add(new QueuedIncident(GetRandomWeightedIncidentFromCategory(iCatDef, target), Find.TickManager.TicksGame + Rand.Range(minTicks, maxTicks)));
+			var incident = GetRandomWeightedIncidentFromCategory(iCatDef, target);
+			var firingDelay = Rand.Range(minTicks, maxTicks);
+			RebeccaLog("Rebecca is queuing \"" + incident.def.defName + "\" for " + firingDelay + " ticks from now.");
+			Current.Game.storyteller.incidentQueue.Add(new QueuedIncident(incident, Find.TickManager.TicksGame + firingDelay));
 		}
 
 		public FiringIncident GetRandomWeightedIncidentFromCategory(IncidentCategoryDef iCatDef, IIncidentTarget target)
         {
 			var parms = GenerateParms(iCatDef, target);
-			var foundDef = UsableIncidentsInCategory(iCatDef, parms).RandomElementByWeightWithFallback(i => i.Worker.BaseChanceThisGame);
-			RebeccaLog("Rebecca is sending \"" + foundDef.defName + "\" from category \"" + iCatDef.defName + "\".");
+			//Evaluate the chance by pop curve as though you always have three colonists, giving it a "medium" sort of chance.
+			var foundDef = UsableIncidentsInCategory(iCatDef, parms).RandomElementByWeightWithFallback(i =>
+			{
+				var popChance = 1f;
+				switch (i.populationEffect)
+                {
+					case IncidentPopulationEffect.IncreaseEasy:
+						popChance = .50f;
+						break;
+					case IncidentPopulationEffect.IncreaseMedium:
+						popChance = .33f;
+						break;
+					case IncidentPopulationEffect.IncreaseHard:
+						popChance = .25f;
+						break;
+                }
+				var finalChance = popChance * i.Worker.BaseChanceThisGame;
+				RebeccaLog("Rebecca is considering sending \"" + i.defName + "\", with population chance compensation of " + popChance + " and a base chance of " + i.Worker.BaseChanceThisGame + " for a final chance of " + finalChance + "..");
+				return finalChance;
+			});
+			RebeccaLog("Rebecca has selected \"" + foundDef.defName + "\" from category \"" + iCatDef.defName + "\".");
 			return new FiringIncident(foundDef, this, parms);
 		}
 
@@ -104,45 +128,48 @@ namespace RR
 			new CurvePoint(14000f, 0f),
 			new CurvePoint(400000f, 2400f),
 			new CurvePoint(700000f, 3600f),
-			new CurvePoint(1000000f, 4200f)
+			new CurvePoint(1000000f, 4200f),
 		};
 
 		//Copypasta from StorytellerUtility w/ modifications to yeet features we don't want.
 		protected static float defaultThreatPointsNow(IIncidentTarget target)
 		{
 			float playerWealthForStoryteller = target.PlayerWealthForStoryteller;
-			float num = pointsPerWealthCurve.Evaluate(playerWealthForStoryteller);
-			float num2 = 0f;
-			foreach (Pawn item in target.PlayerPawnsForStoryteller)
-			{
-				if (item.IsQuestLodger())
-				{
-					continue;
-				}
-				float num3 = 0f;
-				if (item.RaceProps.Animal && item.Faction == Faction.OfPlayer && !item.Downed && item.training.CanAssignToTrain(TrainableDefOf.Release).Accepted)
-				{
-					num3 = 0.08f * item.kindDef.combatPower;
-					if (target is Caravan)
-					{
-						num3 *= 0.7f;
-					}
-				}
-				if (num3 > 0f)
-				{
-					if (item.ParentHolder != null && item.ParentHolder is Building_CryptosleepCasket)
-					{
-						num3 *= 0.3f;
-					}
-					num3 = Mathf.Lerp(num3, num3 * item.health.summaryHealth.SummaryHealthPercent, 0.65f);
-					num2 += num3;
-				}
-			}
-			float num4 = (num + num2) * target.IncidentPointsRandomFactorRange.RandomInRange;
+			float num = pointsPerWealthCurve.Evaluate(playerWealthForStoryteller) * 2; //Double them points, since we're not getting any more for colonists.
+			//This is just for colonist handholding yeeeeet.
+			//float num2 = 0f;
+			//foreach (Pawn item in target.PlayerPawnsForStoryteller)
+			//{
+			//	if (item.IsQuestLodger())
+			//	{
+			//		continue;
+			//	}
+			//	float num3 = 0f;
+			//	if (item.RaceProps.Animal && item.Faction == Faction.OfPlayer && !item.Downed && item.training.CanAssignToTrain(TrainableDefOf.Release).Accepted)
+			//	{
+			//		num3 = 0.08f * item.kindDef.combatPower;
+			//		if (target is Caravan)
+			//		{
+			//			num3 *= 0.7f;
+			//		}
+			//	}
+			//	if (num3 > 0f)
+			//	{
+			//		if (item.ParentHolder != null && item.ParentHolder is Building_CryptosleepCasket)
+			//		{
+			//			num3 *= 0.3f;
+			//		}
+			//		num3 = Mathf.Lerp(num3, num3 * item.health.summaryHealth.SummaryHealthPercent, 0.65f);
+			//		num2 += num3;
+			//	}
+			//}
+			float num4 = /*(*/num /*+ num2)*/ * target.IncidentPointsRandomFactorRange.RandomInRange;
 			//Yeet kindness.
 			//float totalThreatPointsFactor = Find.StoryWatcher.watcherAdaptation.TotalThreatPointsFactor;
 			//float num5 = Mathf.Lerp(1f, totalThreatPointsFactor, Find.Storyteller.difficulty.adaptationEffectFactor);
-			return Mathf.Clamp(num4 /** num5*/ * Find.Storyteller.difficulty.threatScale /** Find.Storyteller.def.pointsFactorFromDaysPassed.Evaluate(GenDate.DaysPassedSinceSettle)*/, 35f, 10000f);
+			var result = Mathf.Clamp(num4 /** num5*/ * Find.Storyteller.difficulty.threatScale /** Find.Storyteller.def.pointsFactorFromDaysPassed.Evaluate(GenDate.DaysPassedSinceSettle)*/, 35f, 10000f);
+			RebeccaLog("Rebecca just calculated defaultThreatPointsNow and got " + result);
+			return result;
 		}
 	}
 }

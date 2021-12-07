@@ -28,7 +28,6 @@ namespace RR
         private string _visitorChanceBuffer;
         private string _visitorIsOrbitalBuffer;
         private string _mtbUnitBuffer;
-        private string _mtbCheckDurationBuffer;
 
         public override void DoSettingsWindowContents(Rect inRect)
         {
@@ -36,7 +35,7 @@ namespace RR
             listingStandard.Begin(inRect);
             listingStandard.TextFieldNumericLabeled<float>("Base Bonus ThreatBig Chance", ref RebeccaSettings.BaseBonusThreatBigChance, ref _baseBonusThreatBigChanceBuffer, 0f, 1f);
             listingStandard.TextFieldNumericLabeled<float>("Extra Chance Per X Wealth", ref RebeccaSettings.BonusThreatBigChancePerWealthChance, ref _bonusThreatBigChancePerWealthChanceBuffer, 0f, 1f);
-            listingStandard.TextFieldNumericLabeled<float>("X Wealth", ref RebeccaSettings.BonusThreatBigChancePerWealthThreshold, ref _bonusThreatBigChancePerWealthThresholdBuffer, 0.01f);
+            listingStandard.TextFieldNumericLabeled<float>("X Wealth", ref RebeccaSettings.BonusThreatBigChancePerWealthThreshold, ref _bonusThreatBigChancePerWealthThresholdBuffer, 1f);
             listingStandard.TextFieldNumericLabeled<float>("Visitor Chance", ref RebeccaSettings.VisitorChance, ref _visitorChanceBuffer, 0f, 1f);
             listingStandard.TextFieldNumericLabeled<float>("Chance Visitor Is Orbital", ref RebeccaSettings.VisitorIsOrbitalChance, ref _visitorIsOrbitalBuffer, 0f, 1f);
             listingStandard.TextFieldNumericLabeled<float>("MTB Unit (Lower Means More Incidents)", ref RebeccaSettings.MTBUnit, ref _mtbUnitBuffer, 0f);

@@ -20,7 +20,7 @@ namespace RR
 
         public override void ExposeData()
         {
-            Scribe_Values.Look(ref BaseBonusThreatBigChance, "BaseBonusRaidChance");
+            Scribe_Values.Look(ref BaseBonusThreatBigChance, "BaseBonusThreatBigChance");
             Scribe_Values.Look(ref BonusThreatBigChancePerWealthChance, "BonusThreatBigChancePerWealthChance");
             Scribe_Values.Look(ref BonusThreatBigChancePerWealthThreshold, "BonusThreatBigChancePerWealthThreshold");
             Scribe_Values.Look(ref VisitorChance, "VisitorChance");
