@@ -37,8 +37,12 @@ namespace RR
             listingStandard.TextFieldNumericLabeled<float>("Base Bonus ThreatBig Chance", ref RebeccaSettings.BaseBonusThreatBigChance, ref _baseBonusThreatBigChanceBuffer, 0f, 1f);
             listingStandard.TextFieldNumericLabeled<float>("Extra Chance Per X Wealth", ref RebeccaSettings.BonusThreatBigChancePerWealthChance, ref _bonusThreatBigChancePerWealthChanceBuffer, 0f, 1f);
             listingStandard.TextFieldNumericLabeled<float>("X Wealth", ref RebeccaSettings.BonusThreatBigChancePerWealthThreshold, ref _bonusThreatBigChancePerWealthThresholdBuffer, 1f);
+            listingStandard.Label("Bonus ThreatBig Spacing (Ticks)");
+            listingStandard.IntRange(ref RebeccaSettings.BonusThreatBigSpacingTicks, 0, int.MaxValue);
             listingStandard.TextFieldNumericLabeled<float>("Visitor Chance", ref RebeccaSettings.VisitorChance, ref _visitorChanceBuffer, 0f, 1f);
             listingStandard.TextFieldNumericLabeled<float>("Chance Visitor Is Orbital", ref RebeccaSettings.VisitorIsOrbitalChance, ref _visitorIsOrbitalBuffer, 0f, 1f);
+            listingStandard.Label("Bonus Visitor Spacing (Ticks)");
+            listingStandard.IntRange(ref RebeccaSettings.VisitorSpacingTicks, 0, int.MaxValue);
             listingStandard.TextFieldNumericLabeled<float>("Threat Points Multiplier", ref RebeccaSettings.ThreatPointsMultiplier, ref _threatPointsMultiplierBuffer, 0f);
             listingStandard.TextFieldNumericLabeled<float>("MTB Unit (Lower Means More Incidents)", ref RebeccaSettings.MTBUnit, ref _mtbUnitBuffer, 0f);
             listingStandard.CheckboxLabeled("Enable Logging", ref RebeccaSettings.LoggingEnabled, "Turn on logging for Rebecca so you can read her mind in the debug log.");

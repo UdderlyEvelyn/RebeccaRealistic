@@ -41,16 +41,16 @@ namespace RR
 			if (RebeccaSettings.LoggingEnabled) //Double-check this one since it does some math, no need to do the math if we're not logging.
 				RebeccaLog("Rebecca is considering sending an extra ThreatBig, chance is: " + Math.Round(100 * (RebeccaSettings.BaseBonusThreatBigChance + (RebeccaSettings.BonusThreatBigChancePerWealthChance * (target.PlayerWealthForStoryteller / RebeccaSettings.BonusThreatBigChancePerWealthThreshold))), 2) + "%");
 			if (Rand.Chance(RebeccaSettings.BaseBonusThreatBigChance + (RebeccaSettings.BonusThreatBigChancePerWealthChance * (target.PlayerWealthForStoryteller / RebeccaSettings.BonusThreatBigChancePerWealthThreshold)))) //10% chance of big incident tacked on plus another 10% per 60k wealth.
-				SendRandomWeightedIncidentFromCategory(iCatDefThreatBig, target, 2500, 3750); //Slightly larger window so it doesn't stack with the visitors or the other too closely.
+				SendRandomWeightedIncidentFromCategory(iCatDefThreatBig, target, RebeccaSettings.BonusThreatBigSpacingTicks.TrueMin, RebeccaSettings.BonusThreatBigSpacingTicks.TrueMax); //Slightly larger window so it doesn't stack with the visitors or the other too closely.
 			else
 				RebeccaLog("Rebecca decided not to.");
 			//Shunt off the visitors to not take up valuable incident randomness since there's so many of those events..
 			if (Rand.Chance(RebeccaSettings.VisitorChance)) //15% chance of having a visitor of some sort
             {
 				if (Rand.Chance(RebeccaSettings.VisitorIsOrbitalChance)) //46% chance of it being an orbital visitor (derived from comparing Randy weights for OrbitalVisitor and FactionArrival)
-					SendRandomWeightedIncidentFromCategory(iCatDefOrbitalVisitor, target);
+					SendRandomWeightedIncidentFromCategory(iCatDefOrbitalVisitor, target, RebeccaSettings.VisitorSpacingTicks.TrueMin, RebeccaSettings.VisitorSpacingTicks.TrueMax);
 				else //FactionArrival instead
-					SendRandomWeightedIncidentFromCategory(iCatDefFactionArrival, target);
+					SendRandomWeightedIncidentFromCategory(iCatDefFactionArrival, target, RebeccaSettings.VisitorSpacingTicks.TrueMin, RebeccaSettings.VisitorSpacingTicks.TrueMax);
 			}
 			//The rest
 			var iCatDef = Props.categoryWeights.RandomElementByWeight(cw => cw.weight).category;
