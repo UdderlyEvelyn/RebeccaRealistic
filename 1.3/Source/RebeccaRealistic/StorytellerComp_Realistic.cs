@@ -54,6 +54,11 @@ namespace RR
 			}
 			//The rest
 			var iCatDef = Props.categoryWeights.RandomElementByWeight(cw => cw.weight).category;
+			if (iCatDef == null)
+            {
+				RebeccaLog("Rebecca tried to find a category to send from, but somehow ended up with a null - damn it, Rebecca.");
+				return blankList;
+            }
 			var incident = GetRandomWeightedIncidentFromCategory(iCatDef, target);
 			RebeccaLog("Rebecca is sending \"" + incident.def.defName + "\" right now!");
 			return new FiringIncident[] { incident };
@@ -70,9 +75,14 @@ namespace RR
 		public FiringIncident GetRandomWeightedIncidentFromCategory(IncidentCategoryDef iCatDef, IIncidentTarget target)
         {
 			var parms = GenerateParms(iCatDef, target);
+			RebeccaLog("Rebecca made the incident parameters, headpats for Rebecca!");
 			//Evaluate the chance by pop curve as though you always have three colonists, giving it a "medium" sort of chance.
-			var foundDef = UsableIncidentsInCategory(iCatDef, parms).RandomElementByWeightWithFallback(i =>
+			var foundDef = UsableIncidentsInCategory(iCatDef, parms).RandomElementByWeight(i =>
 			{
+				if (i == null)
+					RebeccaLog("Rebecca is considering a null incident, oh jeez.. stop that!");
+				if (i.Worker == null)
+					RebeccaLog("Rebecca found an incident with a null worker - that's weird! It's \"" + i.defName + "\".. Let someone know!");
 				var popChance = 1f;
 				switch (i.populationEffect)
                 {
