@@ -15,6 +15,7 @@ namespace RR
         public static float BonusThreatBigChancePerWealthThreshold = 10000f;
         public static float VisitorChance = .15f;
         public static float VisitorIsOrbitalChance = .46f;
+        public static float ThreatPointsMultiplier = 3f;
         public static float MTBUnit = 40000f;
         public static bool LoggingEnabled = false;
 
@@ -25,6 +26,7 @@ namespace RR
             Scribe_Values.Look(ref BonusThreatBigChancePerWealthThreshold, "BonusThreatBigChancePerWealthThreshold");
             Scribe_Values.Look(ref VisitorChance, "VisitorChance");
             Scribe_Values.Look(ref VisitorIsOrbitalChance, "VisitorIsOrbitalChance");
+            Scribe_Values.Look(ref ThreatPointsMultiplier, "ThreatPointsMultiplier");
             Scribe_Values.Look(ref MTBUnit, "MTBUnit");
             Scribe_Values.Look(ref LoggingEnabled, "LoggingEnabled");
             base.ExposeData();

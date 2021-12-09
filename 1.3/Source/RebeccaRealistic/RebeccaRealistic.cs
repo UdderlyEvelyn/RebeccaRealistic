@@ -27,6 +27,7 @@ namespace RR
         private string _bonusThreatBigChancePerWealthThresholdBuffer;
         private string _visitorChanceBuffer;
         private string _visitorIsOrbitalBuffer;
+        private string _threatPointsMultiplierBuffer;
         private string _mtbUnitBuffer;
 
         public override void DoSettingsWindowContents(Rect inRect)
@@ -38,6 +39,7 @@ namespace RR
             listingStandard.TextFieldNumericLabeled<float>("X Wealth", ref RebeccaSettings.BonusThreatBigChancePerWealthThreshold, ref _bonusThreatBigChancePerWealthThresholdBuffer, 1f);
             listingStandard.TextFieldNumericLabeled<float>("Visitor Chance", ref RebeccaSettings.VisitorChance, ref _visitorChanceBuffer, 0f, 1f);
             listingStandard.TextFieldNumericLabeled<float>("Chance Visitor Is Orbital", ref RebeccaSettings.VisitorIsOrbitalChance, ref _visitorIsOrbitalBuffer, 0f, 1f);
+            listingStandard.TextFieldNumericLabeled<float>("Threat Points Multiplier", ref RebeccaSettings.ThreatPointsMultiplier, ref _threatPointsMultiplierBuffer, 0f);
             listingStandard.TextFieldNumericLabeled<float>("MTB Unit (Lower Means More Incidents)", ref RebeccaSettings.MTBUnit, ref _mtbUnitBuffer, 0f);
             listingStandard.CheckboxLabeled("Enable Logging", ref RebeccaSettings.LoggingEnabled, "Turn on logging for Rebecca so you can read her mind in the debug log.");
             listingStandard.End();

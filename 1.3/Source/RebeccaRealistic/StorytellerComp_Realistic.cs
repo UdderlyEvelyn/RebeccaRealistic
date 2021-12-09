@@ -145,7 +145,7 @@ namespace RR
 		protected static float defaultThreatPointsNow(IIncidentTarget target)
 		{
 			float playerWealthForStoryteller = target.PlayerWealthForStoryteller;
-			float num = pointsPerWealthCurve.Evaluate(playerWealthForStoryteller) * 2; //Double them points, since we're not getting any more for colonists.
+			float num = pointsPerWealthCurve.Evaluate(playerWealthForStoryteller) * RebeccaSettings.ThreatPointsMultiplier; //Double them points, since we're not getting any more for colonists.
 			//This is just for colonist handholding yeeeeet.
 			//float num2 = 0f;
 			//foreach (Pawn item in target.PlayerPawnsForStoryteller)
