@@ -77,29 +77,32 @@ namespace RR
 			var parms = GenerateParms(iCatDef, target);
 			RebeccaLog("Rebecca made the incident parameters, headpats for Rebecca!");
 			//Evaluate the chance by pop curve as though you always have three colonists, giving it a "medium" sort of chance.
-			var foundDef = UsableIncidentsInCategory(iCatDef, parms).RandomElementByWeight(i =>
-			{
-				if (i == null)
-					RebeccaLog("Rebecca is considering a null incident, oh jeez.. stop that!");
-				if (i.Worker == null)
-					RebeccaLog("Rebecca found an incident with a null worker - that's weird! It's \"" + i.defName + "\".. Let someone know!");
-				var popChance = 1f;
-				switch (i.populationEffect)
-                {
-					case IncidentPopulationEffect.IncreaseEasy:
-						popChance = .50f;
-						break;
-					case IncidentPopulationEffect.IncreaseMedium:
-						popChance = .33f;
-						break;
-					case IncidentPopulationEffect.IncreaseHard:
-						popChance = .25f;
-						break;
-                }
-				var finalChance = popChance * i.Worker.BaseChanceThisGame;
-				RebeccaLog("Rebecca is considering sending \"" + i.defName + "\", with population chance compensation of " + popChance + " and a base chance of " + i.Worker.BaseChanceThisGame + " for a final chance of " + finalChance + "..");
-				return finalChance;
-			});
+			IncidentDef foundDef = null;
+			bool gotIncident = false;
+			while (!gotIncident)
+				gotIncident = UsableIncidentsInCategory(iCatDef, parms).TryRandomElementByWeight(i =>
+				{
+					if (i == null)
+						RebeccaLog("Rebecca is considering a null incident, oh jeez.. stop that!");
+					if (i.Worker == null)
+						RebeccaLog("Rebecca found an incident with a null worker - that's weird! It's \"" + i.defName + "\".. Let someone know!");
+					var popChance = 1f;
+					switch (i.populationEffect)
+					{
+						case IncidentPopulationEffect.IncreaseEasy:
+							popChance = .50f;
+							break;
+						case IncidentPopulationEffect.IncreaseMedium:
+							popChance = .33f;
+							break;
+						case IncidentPopulationEffect.IncreaseHard:
+							popChance = .25f;
+							break;
+					}
+					var finalChance = popChance * i.Worker.BaseChanceThisGame;
+					RebeccaLog("Rebecca is considering sending \"" + i.defName + "\", with population chance compensation of " + popChance + " and a base chance of " + i.Worker.BaseChanceThisGame + " for a final chance of " + finalChance + "..");
+					return finalChance;
+				}, out foundDef);
 			RebeccaLog("Rebecca has selected \"" + foundDef.defName + "\" from category \"" + iCatDef.defName + "\".");
 			return new FiringIncident(foundDef, this, parms);
 		}
