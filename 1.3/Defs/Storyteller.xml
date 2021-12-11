@@ -4,9 +4,9 @@
 <StorytellerDef ParentName="BaseStoryteller">
     <defName>Rebecca</defName>
     <label>Rebecca Realistic</label>
-    <description>Randy's sister isn't so different from Randy.. except that she doesn't give a damn how much population you have when considering what to throw at you.</description>
-    <portraitLarge>UI/HeroArt/Storytellers/RandyRandom</portraitLarge>
-    <portraitTiny>UI/HeroArt/Storytellers/RandyRandomTiny</portraitTiny>
+    <description>Randy's sister Rebecca sends more events than Randy, a whole lot more. She doesn't care about how much population you have, how much pain you've endured, etc. The only ones who care about your wealth are raiders for threat points - insects care about how many heartbeats they detect around, and manhunters care about how many people are about. She has a chance to send an additional big threat every time she sends you something and that chance scales with wealth. Visitors have their own pipeline so that they don't eat up too much of the pool for random incidents. Generally things are more realistic than the other storytellers as Rebecca was written with love from the ground up.</description>
+    <portraitLarge>RebeccaRealistic</portraitLarge>
+    <portraitTiny>RebeccaRealisticTiny</portraitTiny>
     <listOrder>40</listOrder>
     <comps>
       <!-- Home all -->
