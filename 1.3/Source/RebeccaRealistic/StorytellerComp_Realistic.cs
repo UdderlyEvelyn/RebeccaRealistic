@@ -16,10 +16,19 @@ namespace RR
 		protected IncidentCategoryDef iCatDefOrbitalVisitor = DefDatabase<IncidentCategoryDef>.GetNamed("OrbitalVisitor");
 		protected IncidentCategoryDef iCatDefFactionArrival = DefDatabase<IncidentCategoryDef>.GetNamed("FactionArrival");
 		protected FiringIncident[] blankList = new FiringIncident[0];
+		protected static IncidentWorker rollingForIncidentWorker = null;
 
 		protected StorytellerCompProperties_Realistic Props => (StorytellerCompProperties_Realistic)props;
 
-		public static void RebeccaLog(string message)
+        public override void Initialize()
+        {
+			RebeccaLog("Rebecca is waking up from a nap - she dreamed about a baby cow.");
+			foreach (QueuedIncident qi in Current.Game.storyteller.incidentQueue)
+				RebeccaLog("Rebecca has a \"" + qi.FiringIncident.def.defName + "\" firing in " + (qi.FireTick - Find.TickManager.TicksGame) + " ticks.");
+            base.Initialize();
+        }
+
+        public static void RebeccaLog(string message)
         {
 			if (RebeccaSettings.LoggingEnabled)
 				Log.Message("[" + DateTime.Now.ToShortTimeString() + "] " + message);
@@ -37,30 +46,43 @@ namespace RR
 				RebeccaLog("Rebecca wanted to send something but the target was null. :(");
 				return blankList;
 			}
-			//Added chance of an additional event of ThreatBig.
-			if (RebeccaSettings.LoggingEnabled) //Double-check this one since it does some math, no need to do the math if we're not logging.
-				RebeccaLog("Rebecca is considering sending an extra ThreatBig, chance is: " + Math.Round(100 * (RebeccaSettings.BaseBonusThreatBigChance + (RebeccaSettings.BonusThreatBigChancePerWealthChance * (target.PlayerWealthForStoryteller / RebeccaSettings.BonusThreatBigChancePerWealthThreshold))), 2) + "%");
-			if (Rand.Chance(RebeccaSettings.BaseBonusThreatBigChance + (RebeccaSettings.BonusThreatBigChancePerWealthChance * (target.PlayerWealthForStoryteller / RebeccaSettings.BonusThreatBigChancePerWealthThreshold)))) //10% chance of big incident tacked on plus another 10% per 60k wealth.
-				SendRandomWeightedIncidentFromCategory(iCatDefThreatBig, target, RebeccaSettings.BonusThreatBigSpacingTicks.TrueMin, RebeccaSettings.BonusThreatBigSpacingTicks.TrueMax); //Slightly larger window so it doesn't stack with the visitors or the other too closely.
+			//The rest
+			var iCatDef = Props.categoryWeights.RandomElementByWeight(cw => cw.weight).category;
+			if (iCatDef == null)
+			{
+				RebeccaLog("Rebecca tried to find a category to send from, but somehow ended up with a null - damn it, Rebecca.");
+				return blankList;
+			}
+			var incident = GetRandomWeightedIncidentFromCategory(iCatDef, target); //This will be sent at the end, but now we can check it during other things.
+			bool poolIncidentIsRaid = incident.def.Worker is IncidentWorker_RaidEnemy || (incident.def.tags != null && incident.def.tags.Contains("Raid")); //It's a raid, with option to be supported if you don't use the class as a third party..
+			rollingForIncidentWorker = incident.def.Worker;
+
+			//Added chance of an additional incident of ThreatBig.
+			if (poolIncidentIsRaid)
+				RebeccaLog("Rebecca noticed the incident coming from the pool is a raid.. Chance for two ThreatBigs at once is " + Math.Round(100 * RebeccaSettings.TwoAtOnceThreatBigChance) + "%, rolling!");
+			if (!poolIncidentIsRaid || (poolIncidentIsRaid && Rand.Chance(RebeccaSettings.TwoAtOnceThreatBigChance)))			{
+				if (poolIncidentIsRaid)
+					RebeccaLog("Rebecca decided you needed another ThreatBig at the same time - isn't she thoughtful?");
+				var bonusBigThreatChance = (RebeccaSettings.BaseBonusThreatBigChance + (RebeccaSettings.BonusThreatBigChancePerWealthChance * (target.PlayerWealthForStoryteller / RebeccaSettings.BonusThreatBigChancePerWealthThreshold)));
+					RebeccaLog("Rebecca is considering sending an extra ThreatBig, chance is: " + Math.Round(100 * bonusBigThreatChance, 2) + "%");
+				if (Rand.Chance(bonusBigThreatChance)) //10% chance of big incident tacked on plus another 10% per 60k wealth.
+					SendRandomWeightedIncidentFromCategory(iCatDefThreatBig, target, RebeccaSettings.BonusThreatBigMinimumSpacingTicks, RebeccaSettings.BonusThreatBigMaximumSpacingTicks); //Slightly larger window so it doesn't stack with the visitors or the other too closely.
+				else
+					RebeccaLog("Rebecca decided not to.");
+			}
 			else
-				RebeccaLog("Rebecca decided not to.");
+				RebeccaLog("Rebecca decided one ThreatBig was enough - she can be nice once in a while, savor it.");
+
 			//Shunt off the visitors to not take up valuable incident randomness since there's so many of those events..
 			if (Rand.Chance(RebeccaSettings.VisitorChance)) //15% chance of having a visitor of some sort
             {
 				if (Rand.Chance(RebeccaSettings.VisitorIsOrbitalChance)) //46% chance of it being an orbital visitor (derived from comparing Randy weights for OrbitalVisitor and FactionArrival)
-					SendRandomWeightedIncidentFromCategory(iCatDefOrbitalVisitor, target, RebeccaSettings.VisitorSpacingTicks.TrueMin, RebeccaSettings.VisitorSpacingTicks.TrueMax);
+					SendRandomWeightedIncidentFromCategory(iCatDefOrbitalVisitor, target, RebeccaSettings.VisitorMinimumSpacingTicks, RebeccaSettings.VisitorMaximumSpacingTicks);
 				else //FactionArrival instead
-					SendRandomWeightedIncidentFromCategory(iCatDefFactionArrival, target, RebeccaSettings.VisitorSpacingTicks.TrueMin, RebeccaSettings.VisitorSpacingTicks.TrueMax);
+					SendRandomWeightedIncidentFromCategory(iCatDefFactionArrival, target, RebeccaSettings.VisitorMinimumSpacingTicks, RebeccaSettings.VisitorMaximumSpacingTicks);
 			}
-			//The rest
-			var iCatDef = Props.categoryWeights.RandomElementByWeight(cw => cw.weight).category;
-			if (iCatDef == null)
-            {
-				RebeccaLog("Rebecca tried to find a category to send from, but somehow ended up with a null - damn it, Rebecca.");
-				return blankList;
-            }
-			var incident = GetRandomWeightedIncidentFromCategory(iCatDef, target);
-			RebeccaLog("Rebecca is sending \"" + incident.def.defName + "\" right now!");
+
+			RebeccaLog("Rebecca is sending \"" + incident.def.defName + "\" from the pool right now!");
 			return new FiringIncident[] { incident };
 		}
 
@@ -100,10 +122,10 @@ namespace RR
 							break;
 					}
 					var finalChance = popChance * i.Worker.BaseChanceThisGame;
-					RebeccaLog("Rebecca is considering sending \"" + i.defName + "\", with population chance compensation of " + popChance + " and a base chance of " + i.Worker.BaseChanceThisGame + " for a final chance of " + finalChance + "..");
+					RebeccaLog("Rebecca is considering sending \"" + i.defName + "\", with" + (popChance != 1 ? " population chance compensation of " + popChance + " and" : "") + " a base chance of " + i.Worker.BaseChanceThisGame + " for a final chance of " + finalChance + "..");
 					return finalChance;
 				}, out foundDef);
-			RebeccaLog("Rebecca has selected \"" + foundDef.defName + "\" from category \"" + iCatDef.defName + "\".");
+				RebeccaLog("Rebecca has selected \"" + foundDef.defName + "\" from category \"" + iCatDef.defName + "\".");
 			return new FiringIncident(foundDef, this, parms);
 		}
 
@@ -147,42 +169,40 @@ namespace RR
 		//Copypasta from StorytellerUtility w/ modifications to yeet features we don't want.
 		protected static float defaultThreatPointsNow(IIncidentTarget target)
 		{
-			float playerWealthForStoryteller = target.PlayerWealthForStoryteller;
-			float num = pointsPerWealthCurve.Evaluate(playerWealthForStoryteller) * RebeccaSettings.ThreatPointsMultiplier; //Double them points, since we're not getting any more for colonists.
-			//This is just for colonist handholding yeeeeet.
-			//float num2 = 0f;
-			//foreach (Pawn item in target.PlayerPawnsForStoryteller)
-			//{
-			//	if (item.IsQuestLodger())
-			//	{
-			//		continue;
-			//	}
-			//	float num3 = 0f;
-			//	if (item.RaceProps.Animal && item.Faction == Faction.OfPlayer && !item.Downed && item.training.CanAssignToTrain(TrainableDefOf.Release).Accepted)
-			//	{
-			//		num3 = 0.08f * item.kindDef.combatPower;
-			//		if (target is Caravan)
-			//		{
-			//			num3 *= 0.7f;
-			//		}
-			//	}
-			//	if (num3 > 0f)
-			//	{
-			//		if (item.ParentHolder != null && item.ParentHolder is Building_CryptosleepCasket)
-			//		{
-			//			num3 *= 0.3f;
-			//		}
-			//		num3 = Mathf.Lerp(num3, num3 * item.health.summaryHealth.SummaryHealthPercent, 0.65f);
-			//		num2 += num3;
-			//	}
-			//}
-			float num4 = /*(*/num /*+ num2)*/ * target.IncidentPointsRandomFactorRange.RandomInRange;
-			//Yeet kindness.
-			//float totalThreatPointsFactor = Find.StoryWatcher.watcherAdaptation.TotalThreatPointsFactor;
-			//float num5 = Mathf.Lerp(1f, totalThreatPointsFactor, Find.Storyteller.difficulty.adaptationEffectFactor);
-			var result = Mathf.Clamp(num4 /** num5*/ * Find.Storyteller.difficulty.threatScale /** Find.Storyteller.def.pointsFactorFromDaysPassed.Evaluate(GenDate.DaysPassedSinceSettle)*/, 35f, 10000f);
-			RebeccaLog("Rebecca just calculated defaultThreatPointsNow and got " + result);
-			return result;
+			bool rollingForRaid = rollingForIncidentWorker is IncidentWorker_RaidEnemy;
+			bool rollingForManhunters = rollingForIncidentWorker is IncidentWorker_ManhunterPack;
+			bool rollingForInfestation = rollingForIncidentWorker is IncidentWorker_Infestation;
+			float basePoints = 0; //Doesn't matter what we set here.
+			if (rollingForRaid)
+				basePoints = pointsPerWealthCurve.Evaluate(target.PlayerWealthForStoryteller);
+			else if (rollingForManhunters)
+				basePoints = 50 * target.PlayerPawnsForStoryteller.Count(p =>
+				{
+					if (!(p.IsColonist || p.IsPrisoner || p.IsSlave))
+						return false;
+					if (p.ParentHolder != null && p.ParentHolder is Building_CryptosleepCasket) //Animals don't know people are in there.
+						return false;
+					return true;
+				}); //50 points per non-stasis human-like since they're *manhunters*.
+			else if (rollingForInfestation)
+				basePoints = 50 * target.PlayerPawnsForStoryteller.Count(p =>
+				{
+					if (p.ParentHolder != null && p.ParentHolder is Building_CryptosleepCasket) //Presumably no heartbeats in a cryptosleep casket.
+						return false;
+					return true;
+				}); //50 points per heartbeat.
+			else
+				//Just.. completely random yet modulated for anything else, 4200 is the 1 mil wealth curve mark so it can be anything.
+				basePoints = 4200 * Mathf.Pow(Rand.Value, RebeccaSettings.HighThreatRarityExponent); 
+			basePoints *= RebeccaSettings.ThreatPointsMultiplier; //Make it harder, lmao.
+			float pointsWithIncidentVariance = basePoints * target.IncidentPointsRandomFactorRange.RandomInRange;
+			float pointsAdjustedForDifficulty = pointsWithIncidentVariance * Find.Storyteller.difficulty.threatScale;
+			RebeccaLog("Rebecca just calculated defaultThreatPointsNow " + 
+				(rollingForRaid ? "(rolling for a raid)" : "") +
+				(rollingForManhunters ? "(rolling for a manhunter pack)" : "") +
+				(rollingForInfestation ? "(rolling for an infestation)" : "") +
+				" and got " + pointsAdjustedForDifficulty);
+			return pointsAdjustedForDifficulty;
 		}
 	}
 }
