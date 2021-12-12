@@ -127,35 +127,19 @@ namespace RR
 					RebeccaLog("Rebecca is considering sending \"" + i.defName + "\", with" + (popChance != 1 ? " population chance compensation of " + popChance + " and" : "") + " a base chance of " + i.Worker.BaseChanceThisGame + " for a final chance of " + finalChance + "..");
 					return finalChance;
 				}, out foundDef);
-				RebeccaLog("Rebecca has selected \"" + foundDef.defName + "\" from category \"" + iCatDef.defName + "\".");
+			RebeccaLog("Rebecca has selected \"" + foundDef.defName + "\" from category \"" + iCatDef.defName + "\".");
+			parms.points = defaultThreatPointsNow(target); //Add in the *real* points now that the incident has been selected.
 			return new FiringIncident(foundDef, this, parms);
 		}
 
-		//Copypasta from Randy's RandomMain but pointing at our method for defaultParmsNow
 		public override IncidentParms GenerateParms(IncidentCategoryDef incCat, IIncidentTarget target)
-		{
-			IncidentParms incidentParms = defaultParmsNow(incCat, target);
-			if (incidentParms.points >= 0f)
-			{
-				incidentParms.points *= Props.randomPointsFactorRange.RandomInRange;
-			}
-			return incidentParms;
-		}
-
-		//Copypasta from StorytellerUtility but pointing at our method for defaultThreatPointsNow.
-		protected static IncidentParms defaultParmsNow(IncidentCategoryDef incCat, IIncidentTarget target)
 		{
 			if (incCat == null)
 			{
 				Log.Warning("Trying to get default parms for null incident category.");
 			}
-			IncidentParms incidentParms = new IncidentParms();
-			incidentParms.target = target;
-			if (incCat.needsParmsPoints)
-			{
-				incidentParms.points = defaultThreatPointsNow(target);
-			}
-			return incidentParms;
+			//Psst.. the points are fake, they will be replaced later!
+			return new IncidentParms { target = target, points = 35 };
 		}
 
 		//Copypasta from StorytellerUtility
