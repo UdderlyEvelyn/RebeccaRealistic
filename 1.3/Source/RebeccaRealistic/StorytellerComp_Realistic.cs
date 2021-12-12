@@ -194,7 +194,7 @@ namespace RR
 			else
 				//Just.. completely random yet modulated for anything else, 4200 is the 1 mil wealth curve mark so it can be anything.
 				basePoints = 4200 * Mathf.Pow(Rand.Value, RebeccaSettings.HighThreatRarityExponent); 
-			basePoints *= Rand.Value * RebeccaSettings.ThreatPointsMultiplier; //Make it arbitrarily harder to represent how uncaring the universe is, but not necessarily always the multiplier, let it vary!
+			basePoints = Rand.Range(basePoints, basePoints * RebeccaSettings.ThreatPointsMultiplier); //Make it arbitrarily harder to represent how uncaring the universe is, but not necessarily always the multiplier, let it vary!
 			float pointsAdjustedForDifficulty = basePoints * Find.Storyteller.difficulty.threatScale; //Apply the user's settings, in case they're **INSANE** and set it higher than 100%.
 			RebeccaLog("Rebecca just calculated defaultThreatPointsNow " + 
 				(rollingForRaid ? "(rolling for a raid)" : "") +
