@@ -20,7 +20,7 @@ namespace RR
         public static float VisitorIsOrbitalChance = .46f;
         public static int VisitorMinimumSpacingTicks = 1250;
         public static int VisitorMaximumSpacingTicks = 2500;
-        public static float ThreatPointsMultiplier = 3f;
+        public static float ThreatPointsMultiplier = 3.5f;
         public static float MTBUnit = 40000f;
         public static float HighThreatRarityExponent = 2;
         public static bool LoggingEnabled = false;
