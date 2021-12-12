@@ -22,6 +22,7 @@ namespace RR
             return "Rebecca Realistic";
         }
 
+        private string _delayedWealthEffectPerDayBuffer;
         private string _twoAtOnceThreatBigChanceBuffer;
         private string _baseBonusThreatBigChanceBuffer;
         private string _bonusThreatBigChancePerWealthChanceBuffer;
@@ -40,6 +41,7 @@ namespace RR
         {
             Listing_Standard listingStandard = new Listing_Standard();
             listingStandard.Begin(inRect);
+            listingStandard.TextFieldNumericLabeled<float>("Delayed Wealth Effect Per Day (%)", ref RebeccaSettings.DelayedWealthEffectPerDay, ref _delayedWealthEffectPerDayBuffer, 0f, 1f);
             listingStandard.TextFieldNumericLabeled<float>("Two At Once ThreatBig Chance", ref RebeccaSettings.TwoAtOnceThreatBigChance, ref _twoAtOnceThreatBigChanceBuffer, 0f, 1f);
             listingStandard.TextFieldNumericLabeled<float>("Base Bonus ThreatBig Chance", ref RebeccaSettings.BaseBonusThreatBigChance, ref _baseBonusThreatBigChanceBuffer, 0f, 1f);
             listingStandard.TextFieldNumericLabeled<float>("Extra Chance Per X Wealth", ref RebeccaSettings.BonusThreatBigChancePerWealthChance, ref _bonusThreatBigChancePerWealthChanceBuffer, 0f, 1f);

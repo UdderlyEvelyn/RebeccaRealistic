@@ -10,6 +10,7 @@ namespace RR
 {
     public class RebeccaSettings : ModSettings
     {
+        public static float DelayedWealthEffectPerDay = .1f;
         public static float TwoAtOnceThreatBigChance = .3f;
         public static float BaseBonusThreatBigChance = .1f;
         public static float BonusThreatBigChancePerWealthChance = .01f;
@@ -27,6 +28,7 @@ namespace RR
 
         public override void ExposeData()
         {
+            Scribe_Values.Look(ref DelayedWealthEffectPerDay, "DelayedWealthEffectPerDay");
             Scribe_Values.Look(ref TwoAtOnceThreatBigChance, "TwoAtOnceThreatBigChance");
             Scribe_Values.Look(ref BaseBonusThreatBigChance, "BaseBonusThreatBigChance");
             Scribe_Values.Look(ref BonusThreatBigChancePerWealthChance, "BonusThreatBigChancePerWealthChance");

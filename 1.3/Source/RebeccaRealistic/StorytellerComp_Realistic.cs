@@ -12,11 +12,13 @@ namespace RR
 {
 	public class StorytellerComp_Realistic : StorytellerComp
     {
+		protected static float consideredPlayerWealth = 0;
 		protected IncidentCategoryDef iCatDefThreatBig = DefDatabase<IncidentCategoryDef>.GetNamed("ThreatBig");
 		protected IncidentCategoryDef iCatDefOrbitalVisitor = DefDatabase<IncidentCategoryDef>.GetNamed("OrbitalVisitor");
 		protected IncidentCategoryDef iCatDefFactionArrival = DefDatabase<IncidentCategoryDef>.GetNamed("FactionArrival");
 		protected FiringIncident[] blankList = new FiringIncident[0];
 		protected static IncidentWorker rollingForIncidentWorker = null;
+		protected static Dictionary<Map, MapComp_Realistic> mapCompCache = new Dictionary<Map, MapComp_Realistic>();
 
 		protected StorytellerCompProperties_Realistic Props => (StorytellerCompProperties_Realistic)props;
 
@@ -174,7 +176,31 @@ namespace RR
 			bool rollingForInfestation = rollingForIncidentWorker is IncidentWorker_Infestation;
 			float basePoints = 0; //Doesn't matter what we set here.
 			if (rollingForRaid)
-				basePoints = pointsPerWealthCurve.Evaluate(target.PlayerWealthForStoryteller);
+			{
+				//If the target's a map, get our MapComp and use the lerped wealth rather than the raw one, otherwise use raw one.
+				var map = target as Map;
+				float wealth = 0;
+				if (map != null)
+				{
+					MapComp_Realistic mapComp = null;
+					//Check cache.
+					if (mapCompCache.ContainsKey(map))
+						mapComp = mapCompCache[map];
+					else //Not cached, cache it.
+					{
+						mapComp = map.GetComponent<MapComp_Realistic>();
+						mapCompCache.Add(map, mapComp);
+					}
+					wealth = mapComp.ConsideredWealth;
+				}
+				else
+				{
+					wealth = target.PlayerWealthForStoryteller;
+					RebeccaLog("Rebecca found a non-Map target, it's a \"" + target.GetType().FullName + "\"!");
+				}
+				RebeccaLog("Rebecca is looking at your wealth, the world is aware of $" + wealth);
+				basePoints = pointsPerWealthCurve.Evaluate(wealth);
+			}
 			else if (rollingForManhunters)
 				basePoints = 50 * target.PlayerPawnsForStoryteller.Count(p =>
 				{

@@ -49,6 +49,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MapComp_Realistic.cs" />
     <Compile Include="RebeccaRealistic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RebeccaSettings.cs" />
