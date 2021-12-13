@@ -58,6 +58,8 @@ namespace RR
 			var incident = GetRandomWeightedIncidentFromCategory(iCatDef, target); //This will be sent at the end, but now we can check it during other things.
 			bool poolIncidentIsRaid = incident.def.Worker is IncidentWorker_RaidEnemy || (incident.def.tags != null && incident.def.tags.Contains("Raid")); //It's a raid, with option to be supported if you don't use the class as a third party..
 			rollingForIncidentWorker = incident.def.Worker;
+			RebeccaLog("Rebecca selected an incident, and set rollingForIncidentWorker to " + (rollingForIncidentWorker == null ? "null" : "a \"" + rollingForIncidentWorker.GetType().FullName) + "\".");
+			incident.parms.points = defaultThreatPointsNow(target); //Add in the *real* points now that the incident has been selected.
 
 			//Added chance of an additional incident of ThreatBig.
 			if (poolIncidentIsRaid)
@@ -91,6 +93,7 @@ namespace RR
 		public void SendRandomWeightedIncidentFromCategory(IncidentCategoryDef iCatDef, IIncidentTarget target, int minTicks = 1250, int maxTicks = 2500)
         {
 			var incident = GetRandomWeightedIncidentFromCategory(iCatDef, target);
+			incident.parms.points = defaultThreatPointsNow(target); //Add in the *real* points now that the incident has been selected.
 			var firingDelay = Rand.Range(minTicks, maxTicks);
 			RebeccaLog("Rebecca is queuing \"" + incident.def.defName + "\" for " + firingDelay + " ticks from now.");
 			Current.Game.storyteller.incidentQueue.Add(new QueuedIncident(incident, Find.TickManager.TicksGame + firingDelay));
@@ -128,7 +131,6 @@ namespace RR
 					return finalChance;
 				}, out foundDef);
 			RebeccaLog("Rebecca has selected \"" + foundDef.defName + "\" from category \"" + iCatDef.defName + "\".");
-			parms.points = defaultThreatPointsNow(target); //Add in the *real* points now that the incident has been selected.
 			return new FiringIncident(foundDef, this, parms);
 		}
 
@@ -155,6 +157,7 @@ namespace RR
 		//Copypasta from StorytellerUtility w/ modifications to yeet features we don't want.
 		protected static float defaultThreatPointsNow(IIncidentTarget target)
 		{
+			RebeccaLog("Rebecca is calculating defaultThreatPointsNow, rollingForIncidentWorker is " + (rollingForIncidentWorker == null ? "null" : "a \"" + rollingForIncidentWorker.GetType().FullName) + "\".");
 			bool rollingForRaid = rollingForIncidentWorker is IncidentWorker_RaidEnemy;
 			bool rollingForManhunters = rollingForIncidentWorker is IncidentWorker_ManhunterPack;
 			bool rollingForInfestation = rollingForIncidentWorker is IncidentWorker_Infestation;
