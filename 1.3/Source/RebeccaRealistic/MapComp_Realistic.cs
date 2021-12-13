@@ -26,7 +26,7 @@ namespace RR
             if (ticksSinceLastUpdate > 60000)
             {
                 var daysSinceLastUpdate = ticksSinceLastUpdate / 60000;
-                Mathf.Lerp(ConsideredWealth, map.PlayerWealthForStoryteller, RebeccaSettings.DelayedWealthEffectPerDay * daysSinceLastUpdate);
+                ConsideredWealth = Mathf.Lerp(ConsideredWealth, map.PlayerWealthForStoryteller, RebeccaSettings.DelayedWealthEffectPerDay * daysSinceLastUpdate);
                 LastUpdateTick = currentTick;
             }
             base.MapComponentTick();
