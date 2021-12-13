@@ -17,7 +17,6 @@ namespace RR
 		protected IncidentCategoryDef iCatDefOrbitalVisitor = DefDatabase<IncidentCategoryDef>.GetNamed("OrbitalVisitor");
 		protected IncidentCategoryDef iCatDefFactionArrival = DefDatabase<IncidentCategoryDef>.GetNamed("FactionArrival");
 		protected FiringIncident[] blankList = new FiringIncident[0];
-		protected static IncidentDef rollingForIncidentDef = null;
 		protected static Dictionary<Map, MapComp_Realistic> mapCompCache = new Dictionary<Map, MapComp_Realistic>();
 
 		protected StorytellerCompProperties_Realistic Props => (StorytellerCompProperties_Realistic)props;
@@ -57,8 +56,7 @@ namespace RR
 			}
 			var incident = GetRandomWeightedIncidentFromCategory(iCatDef, target); //This will be sent at the end, but now we can check it during other things.
 			bool poolIncidentIsRaid = incident.def.Worker is IncidentWorker_RaidEnemy || (incident.def.tags != null && incident.def.tags.Contains("Raid")); //It's a raid, with option to be supported if you don't use the class as a third party..
-			rollingForIncidentDef = incident.def;
-			incident.parms.points = defaultThreatPointsNow(target); //Add in the *real* points now that the incident has been selected.
+			incident.parms.points = defaultThreatPointsNow(target, incident.def); //Add in the *real* points now that the incident has been selected.
 
 			//Added chance of an additional incident of ThreatBig.
 			if (poolIncidentIsRaid)
@@ -92,7 +90,7 @@ namespace RR
 		public void SendRandomWeightedIncidentFromCategory(IncidentCategoryDef iCatDef, IIncidentTarget target, int minTicks = 1250, int maxTicks = 2500)
         {
 			var incident = GetRandomWeightedIncidentFromCategory(iCatDef, target);
-			incident.parms.points = defaultThreatPointsNow(target); //Add in the *real* points now that the incident has been selected.
+			incident.parms.points = defaultThreatPointsNow(target, incident.def); //Add in the *real* points now that the incident has been selected.
 			var firingDelay = Rand.Range(minTicks, maxTicks);
 			RebeccaLog("Rebecca is queuing \"" + incident.def.defName + "\" for " + firingDelay + " ticks from now.");
 			Current.Game.storyteller.incidentQueue.Add(new QueuedIncident(incident, Find.TickManager.TicksGame + firingDelay));
@@ -154,7 +152,7 @@ namespace RR
 		};
 
 		//Copypasta from StorytellerUtility w/ modifications to yeet features we don't want.
-		protected static float defaultThreatPointsNow(IIncidentTarget target)
+		protected static float defaultThreatPointsNow(IIncidentTarget target, IncidentDef rollingForIncidentDef)
 		{
 			RebeccaLog("Rebecca is calculating defaultThreatPointsNow for incident \"" + rollingForIncidentDef.defName + "\" with worker \"" + (rollingForIncidentDef.Worker == null ? "NULL" : rollingForIncidentDef.Worker.GetType().FullName) + "\".");
 			bool rollingForRaid = rollingForIncidentDef.Worker is IncidentWorker_RaidEnemy || 
