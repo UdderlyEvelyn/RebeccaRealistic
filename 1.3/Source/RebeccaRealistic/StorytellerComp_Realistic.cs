@@ -160,7 +160,9 @@ namespace RR
 			bool rollingForManhunters = rollingForIncidentDef.Worker is IncidentWorker_ManhunterPack;
 			bool rollingForInfestation = rollingForIncidentDef.Worker is IncidentWorker_Infestation || 
 										 rollingForIncidentDef.Worker.def.defName == "IncidentWorker_BlackHive";
-			float basePoints = 0; //Doesn't matter what we set here.
+			//Doesn't matter what we set here, but in case we ever get to the end without setting it for a raid,
+			//raids will error at $0 though work fine (there's a fallback system apparently), this avoids that just in case.
+			float basePoints = Mathf.Max(rollingForIncidentDef.minThreatPoints, 35); 
 			if (rollingForManhunters)
 				basePoints = 50 * target.PlayerPawnsForStoryteller.Count(p =>
 				{
