@@ -17,7 +17,7 @@ namespace RR
 		protected IncidentCategoryDef iCatDefOrbitalVisitor = DefDatabase<IncidentCategoryDef>.GetNamed("OrbitalVisitor");
 		protected IncidentCategoryDef iCatDefFactionArrival = DefDatabase<IncidentCategoryDef>.GetNamed("FactionArrival");
 		protected FiringIncident[] blankList = new FiringIncident[0];
-		protected static IncidentWorker rollingForIncidentWorker = null;
+		protected static IncidentDef rollingForIncidentDef = null;
 		protected static Dictionary<Map, MapComp_Realistic> mapCompCache = new Dictionary<Map, MapComp_Realistic>();
 
 		protected StorytellerCompProperties_Realistic Props => (StorytellerCompProperties_Realistic)props;
@@ -57,8 +57,7 @@ namespace RR
 			}
 			var incident = GetRandomWeightedIncidentFromCategory(iCatDef, target); //This will be sent at the end, but now we can check it during other things.
 			bool poolIncidentIsRaid = incident.def.Worker is IncidentWorker_RaidEnemy || (incident.def.tags != null && incident.def.tags.Contains("Raid")); //It's a raid, with option to be supported if you don't use the class as a third party..
-			rollingForIncidentWorker = incident.def.Worker;
-			RebeccaLog("Rebecca selected an incident, and set rollingForIncidentWorker to " + (rollingForIncidentWorker == null ? "null" : "a \"" + rollingForIncidentWorker.GetType().FullName) + "\".");
+			rollingForIncidentDef = incident.def;
 			incident.parms.points = defaultThreatPointsNow(target); //Add in the *real* points now that the incident has been selected.
 
 			//Added chance of an additional incident of ThreatBig.
@@ -157,12 +156,30 @@ namespace RR
 		//Copypasta from StorytellerUtility w/ modifications to yeet features we don't want.
 		protected static float defaultThreatPointsNow(IIncidentTarget target)
 		{
-			RebeccaLog("Rebecca is calculating defaultThreatPointsNow, rollingForIncidentWorker is " + (rollingForIncidentWorker == null ? "null" : "a \"" + rollingForIncidentWorker.GetType().FullName) + "\".");
-			bool rollingForRaid = rollingForIncidentWorker is IncidentWorker_RaidEnemy;
-			bool rollingForManhunters = rollingForIncidentWorker is IncidentWorker_ManhunterPack;
-			bool rollingForInfestation = rollingForIncidentWorker is IncidentWorker_Infestation;
+			RebeccaLog("Rebecca is calculating defaultThreatPointsNow for incident \"" + rollingForIncidentDef.defName + "\" with worker \"" + (rollingForIncidentDef.Worker == null ? "NULL" : rollingForIncidentDef.Worker.GetType().FullName) + "\".");
+			bool rollingForRaid = rollingForIncidentDef.Worker is IncidentWorker_RaidEnemy || 
+								  (rollingForIncidentDef.tale != null && rollingForIncidentDef.tale.defName == "Raid");
+			bool rollingForManhunters = rollingForIncidentDef.Worker is IncidentWorker_ManhunterPack;
+			bool rollingForInfestation = rollingForIncidentDef.Worker is IncidentWorker_Infestation || 
+										 rollingForIncidentDef.Worker.def.defName == "IncidentWorker_BlackHive";
 			float basePoints = 0; //Doesn't matter what we set here.
-			if (rollingForRaid)
+			if (rollingForManhunters)
+				basePoints = 50 * target.PlayerPawnsForStoryteller.Count(p =>
+				{
+					if (!(p.IsColonist || p.IsPrisoner || p.IsSlave))
+						return false;
+					if (p.ParentHolder != null && p.ParentHolder is Building_CryptosleepCasket) //Animals don't know people are in there.
+						return false;
+					return true;
+				}); //50 points per non-stasis human-like since they're *manhunters*.
+			else if (rollingForInfestation)
+				basePoints = 50 * target.PlayerPawnsForStoryteller.Count(p =>
+				{
+					if (p.ParentHolder != null && p.ParentHolder is Building_CryptosleepCasket) //Presumably no heartbeats in a cryptosleep casket.
+						return false;
+					return true;
+				}); //50 points per heartbeat.
+			else if (rollingForRaid)
 			{
 				//If the target's a map, get our MapComp and use the lerped wealth rather than the raw one, otherwise use raw one.
 				var map = target as Map;
@@ -188,32 +205,20 @@ namespace RR
 				RebeccaLog("Rebecca is looking at your wealth, the world is aware of $" + wealth);
 				basePoints = pointsPerWealthCurve.Evaluate(wealth);
 			}
-			else if (rollingForManhunters)
-				basePoints = 50 * target.PlayerPawnsForStoryteller.Count(p =>
-				{
-					if (!(p.IsColonist || p.IsPrisoner || p.IsSlave))
-						return false;
-					if (p.ParentHolder != null && p.ParentHolder is Building_CryptosleepCasket) //Animals don't know people are in there.
-						return false;
-					return true;
-				}); //50 points per non-stasis human-like since they're *manhunters*.
-			else if (rollingForInfestation)
-				basePoints = 50 * target.PlayerPawnsForStoryteller.Count(p =>
-				{
-					if (p.ParentHolder != null && p.ParentHolder is Building_CryptosleepCasket) //Presumably no heartbeats in a cryptosleep casket.
-						return false;
-					return true;
-				}); //50 points per heartbeat.
-			else
-				//Just.. completely random yet modulated for anything else, 4200 is the 1 mil wealth curve mark so it can be anything.
-				basePoints = 4200 * Mathf.Pow(Rand.Value, RebeccaSettings.HighThreatRarityExponent); 
-			basePoints = Rand.Range(basePoints, basePoints * RebeccaSettings.ThreatPointsMultiplier); //Make it arbitrarily harder to represent how uncaring the universe is, but not necessarily always the multiplier, let it vary!
+			//if (!rollingForRaid)
+			//	basePoints += 1000 * Mathf.Pow(Rand.Value, RebeccaSettings.HighThreatRarityExponent);
+			else //Rebecca doesn't know what this is.
+			{
+				RebeccaLog("Rebecca doesn't know what a \"" + rollingForIncidentDef.defName + "\" is, so she's gonna use a curved RNG to determine points!");
+				basePoints = 4200 * Mathf.Pow(Rand.Value, RebeccaSettings.HighThreatRarityExponent);
+			}
+            basePoints = Rand.Range(basePoints, basePoints * RebeccaSettings.ThreatPointsMultiplier); //Make it arbitrarily harder to represent how uncaring the universe is, but not necessarily always the multiplier, let it vary!
 			float pointsAdjustedForDifficulty = basePoints * Find.Storyteller.difficulty.threatScale; //Apply the user's settings, in case they're **INSANE** and set it higher than 100%.
 			RebeccaLog("Rebecca just calculated defaultThreatPointsNow " + 
-				(rollingForRaid ? "(rolling for a raid)" : "") +
-				(rollingForManhunters ? "(rolling for a manhunter pack)" : "") +
-				(rollingForInfestation ? "(rolling for an infestation)" : "") +
-				" and got " + pointsAdjustedForDifficulty);
+				(rollingForRaid ? "(rolling for a raid) " : "") +
+				(rollingForManhunters ? "(rolling for a manhunter pack) " : "") +
+				(rollingForInfestation ? "(rolling for an infestation) " : "") +
+				"and got " + pointsAdjustedForDifficulty);
 			return pointsAdjustedForDifficulty;
 		}
 	}
