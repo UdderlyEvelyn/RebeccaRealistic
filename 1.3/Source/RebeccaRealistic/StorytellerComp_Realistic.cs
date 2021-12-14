@@ -141,16 +141,6 @@ namespace RR
 			return new IncidentParms { target = target, points = 35 };
 		}
 
-		//Copypasta from StorytellerUtility
-		protected static readonly SimpleCurve pointsPerWealthCurve = new SimpleCurve
-		{
-			new CurvePoint(0f, 0f),
-			new CurvePoint(14000f, 0f),
-			new CurvePoint(400000f, 2400f),
-			new CurvePoint(700000f, 3600f),
-			new CurvePoint(1000000f, 4200f),
-		};
-
 		//Copypasta from StorytellerUtility w/ modifications to yeet features we don't want.
 		protected static float defaultThreatPointsNow(IIncidentTarget target, IncidentDef rollingForIncidentDef)
 		{
@@ -203,7 +193,18 @@ namespace RR
 					RebeccaLog("Rebecca found a non-Map target, it's a \"" + target.GetType().FullName + "\"!");
 				}
 				RebeccaLog("Rebecca is looking at your wealth, the world is aware of $" + wealth);
-				basePoints = pointsPerWealthCurve.Evaluate(wealth);
+				//y=9742.433+(120.3303-9742.433)/(1+(x/1326793)^.9796777) per mycurvefit.com in symmetrical sigmoidal mode
+				//for the points I plugged (partly based on vanilla curve):
+				/*
+				 *0 - 35
+				 *14k - 300
+				 *100k - 1k 
+				 *200k - 1.2k 
+				 *400k - 2.4k 
+				 *700k - 3.6k
+				 *1m - 4.2k 
+				 */
+				basePoints = 120.3303f/(float)(1+Math.Pow((double)wealth/1326793, .9796777));
 			}
 			//if (!rollingForRaid)
 			//	basePoints += 1000 * Mathf.Pow(Rand.Value, RebeccaSettings.HighThreatRarityExponent);
