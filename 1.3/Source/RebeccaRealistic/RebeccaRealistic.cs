@@ -33,6 +33,7 @@ namespace RR
         private string _visitorIsOrbitalBuffer;
         private string _visitorMinimumSpacingTicksBuffer;
         private string _visitorMaximumSpacingTicksBuffer;
+        private string _visitorMaxThreatPointsBuffer;
         private string _threatPointsMultiplierBuffer;
         private string _mtbUnitBuffer;
         private string _highThreatRarityExponentBuffer;
@@ -53,6 +54,7 @@ namespace RR
             listingStandard.TextFieldNumericLabeled<float>("Threat Points Multiplier", ref RebeccaSettings.ThreatPointsMultiplier, ref _threatPointsMultiplierBuffer, 0f);
             listingStandard.TextFieldNumericLabeled<int>("Visitor Minimum Spacing Ticks", ref RebeccaSettings.VisitorMinimumSpacingTicks, ref _visitorMinimumSpacingTicksBuffer, 0f);
             listingStandard.TextFieldNumericLabeled<int>("Visitor Maximum Spacing Ticks", ref RebeccaSettings.VisitorMaximumSpacingTicks, ref _visitorMaximumSpacingTicksBuffer, 0f);
+            listingStandard.TextFieldNumericLabeled<float>("Visitor Max Threat Points", ref RebeccaSettings.VisitorMaxThreatPoints, ref _visitorMaxThreatPointsBuffer);
             listingStandard.TextFieldNumericLabeled<float>("MTB Unit (Lower Means More Incidents)", ref RebeccaSettings.MTBUnit, ref _mtbUnitBuffer, 0f);
             listingStandard.TextFieldNumericLabeled<float>("High Threat Rarity Exponent (Higher Means Rarer)", ref RebeccaSettings.HighThreatRarityExponent, ref _highThreatRarityExponentBuffer, 2f);
             listingStandard.CheckboxLabeled("Enable Logging", ref RebeccaSettings.LoggingEnabled, "Turn on logging for Rebecca so you can read her mind in the debug log.");
@@ -60,4 +62,3 @@ namespace RR
             base.DoSettingsWindowContents(inRect);
         }
     }
-}

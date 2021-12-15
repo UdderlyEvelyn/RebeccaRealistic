@@ -21,6 +21,7 @@ namespace RR
         public static float VisitorIsOrbitalChance = .46f;
         public static int VisitorMinimumSpacingTicks = 1250;
         public static int VisitorMaximumSpacingTicks = 2500;
+        public static float VisitorMaxThreatPoints = 3000;
         public static float ThreatPointsMultiplier = 3f;
         public static float MTBUnit = 40000f;
         public static float HighThreatRarityExponent = 3.5f;
@@ -39,6 +40,7 @@ namespace RR
             Scribe_Values.Look(ref VisitorIsOrbitalChance, "VisitorIsOrbitalChance");
             Scribe_Values.Look(ref VisitorMinimumSpacingTicks, "VisitorMinimumSpacingTicks");
             Scribe_Values.Look(ref VisitorMaximumSpacingTicks, "VisitorMaximumSpacingTicks");
+            Scribe_Values.Look(ref VisitorMaxThreatPoints, "VisitorMaxThreatPoints");
             Scribe_Values.Look(ref ThreatPointsMultiplier, "ThreatPointsMultiplier");
             Scribe_Values.Look(ref MTBUnit, "MTBUnit");
             Scribe_Values.Look(ref HighThreatRarityExponent, "HighThreatRarityExponent");

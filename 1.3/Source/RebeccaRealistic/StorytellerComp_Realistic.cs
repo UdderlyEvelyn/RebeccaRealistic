@@ -150,6 +150,7 @@ namespace RR
 			bool rollingForManhunters = rollingForIncidentDef.Worker is IncidentWorker_ManhunterPack;
 			bool rollingForInfestation = rollingForIncidentDef.Worker is IncidentWorker_Infestation || 
 										 rollingForIncidentDef.Worker.def.defName == "IncidentWorker_BlackHive";
+			bool rollingForNeutralGroup = rollingForIncidentDef.Worker is IncidentWorker_NeutralGroup;
 			//Doesn't matter what we set here, but in case we ever get to the end without setting it for a raid,
 			//raids will error at $0 though work fine (there's a fallback system apparently), this avoids that just in case.
 			float basePoints = Mathf.Max(rollingForIncidentDef.minThreatPoints, 35); 
@@ -169,7 +170,7 @@ namespace RR
 						return false;
 					return true;
 				}); //50 points per heartbeat.
-			else if (rollingForRaid)
+			else if (rollingForRaid || rollingForNeutralGroup)
 			{
 				//If the target's a map, get our MapComp and use the lerped wealth rather than the raw one, otherwise use raw one.
 				var map = target as Map;
@@ -204,7 +205,10 @@ namespace RR
 				 *700k - 3.6k
 				 *1m - 4.2k 
 				 */
+				//I ofc removed the needless 9742.433 nonsense.. lol
 				basePoints = 120.3303f/(float)(1+Math.Pow((double)wealth/1326793, .9796777));
+				if (rollingForNeutralGroup) //If it's a neutral group..
+					basePoints = Math.Max(Rand.Range(100, basePoints), RebeccaSettings.MaxVisitorGroupThreatPoints); //Let it drop as low as 100 randomly, cap it at a user setting that defaults at 3k.
 			}
 			//if (!rollingForRaid)
 			//	basePoints += 1000 * Mathf.Pow(Rand.Value, RebeccaSettings.HighThreatRarityExponent);
@@ -219,6 +223,7 @@ namespace RR
 				(rollingForRaid ? "(rolling for a raid) " : "") +
 				(rollingForManhunters ? "(rolling for a manhunter pack) " : "") +
 				(rollingForInfestation ? "(rolling for an infestation) " : "") +
+				(rollingForNeutralGroup ? "(rolling for a neutral group) " : "") +
 				"and got " + pointsAdjustedForDifficulty);
 			return pointsAdjustedForDifficulty;
 		}
