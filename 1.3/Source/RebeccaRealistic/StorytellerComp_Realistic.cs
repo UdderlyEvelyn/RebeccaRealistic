@@ -207,8 +207,6 @@ namespace RR
 				 */
 				//I ofc removed the needless 9742.433 nonsense.. lol
 				basePoints = 120.3303f/(float)(1+Math.Pow((double)wealth/1326793, .9796777));
-				if (rollingForNeutralGroup) //If it's a neutral group..
-					basePoints = Math.Max(Rand.Range(100, basePoints), RebeccaSettings.MaxVisitorGroupThreatPoints); //Let it drop as low as 100 randomly, cap it at a user setting that defaults at 3k.
 			}
 			//if (!rollingForRaid)
 			//	basePoints += 1000 * Mathf.Pow(Rand.Value, RebeccaSettings.HighThreatRarityExponent);
@@ -219,6 +217,8 @@ namespace RR
 			}
             basePoints = Rand.Range(basePoints, basePoints * RebeccaSettings.ThreatPointsMultiplier); //Make it arbitrarily harder to represent how uncaring the universe is, but not necessarily always the multiplier, let it vary!
 			float pointsAdjustedForDifficulty = basePoints * Find.Storyteller.difficulty.threatScale; //Apply the user's settings, in case they're **INSANE** and set it higher than 100%.
+			if (rollingForNeutralGroup) //If it's a neutral group..
+				basePoints = Math.Max(Rand.Range(100, basePoints), RebeccaSettings.VisitorMaxThreatPoints); //Let it drop as low as 100 randomly, cap it at a user setting that defaults at 3k.
 			RebeccaLog("Rebecca just calculated defaultThreatPointsNow " + 
 				(rollingForRaid ? "(rolling for a raid) " : "") +
 				(rollingForManhunters ? "(rolling for a manhunter pack) " : "") +
