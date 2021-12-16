@@ -26,6 +26,8 @@ namespace RR
         public static float MTBUnit = 40000f;
         public static float HighThreatRarityExponent = 3.5f;
         public static bool LoggingEnabled = false;
+        public static bool LogNothingsEnabled = false;
+        public static bool IncidentSelectionLoggingEnabled = false;
 
         public override void ExposeData()
         {
@@ -45,6 +47,9 @@ namespace RR
             Scribe_Values.Look(ref MTBUnit, "MTBUnit");
             Scribe_Values.Look(ref HighThreatRarityExponent, "HighThreatRarityExponent");
             Scribe_Values.Look(ref LoggingEnabled, "LoggingEnabled");
+            Scribe_Values.Look(ref LogNothingsEnabled, "LogNothingsEnabled");
+            Scribe_Values.Look(ref IncidentSelectionLoggingEnabled, "IncidentSelectionLoggingEnabled");
+
             base.ExposeData();
         }
     }

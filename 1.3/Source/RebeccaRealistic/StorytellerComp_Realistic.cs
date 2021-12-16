@@ -39,7 +39,8 @@ namespace RR
 		{
 			if (!Rand.MTBEventOccurs(Props.mtbDays, RebeccaSettings.MTBUnit, 1000f))
 			{
-				RebeccaLog("Rebecca has decided to send nothing..");
+				if (RebeccaSettings.LogNothingsEnabled)
+					RebeccaLog("Rebecca has decided to send nothing..");
 				return blankList;
 			}
 			else if (target == null) //Problem.
@@ -66,7 +67,7 @@ namespace RR
 					RebeccaLog("Rebecca decided you needed another ThreatBig at the same time - isn't she thoughtful?");
 				var bonusBigThreatChance = (RebeccaSettings.BaseBonusThreatBigChance + (RebeccaSettings.BonusThreatBigChancePerWealthChance * (target.PlayerWealthForStoryteller / RebeccaSettings.BonusThreatBigChancePerWealthThreshold)));
 					RebeccaLog("Rebecca is considering sending an extra ThreatBig, chance is: " + Math.Round(100 * bonusBigThreatChance, 2) + "%");
-				if (Rand.Chance(bonusBigThreatChance)) //10% chance of big incident tacked on plus another 10% per 60k wealth.
+				if (Rand.Chance(bonusBigThreatChance)) //10% chance of big incident tacked on plus another 10% per 10k wealth.
 					SendRandomWeightedIncidentFromCategory(iCatDefThreatBig, target, RebeccaSettings.BonusThreatBigMinimumSpacingTicks, RebeccaSettings.BonusThreatBigMaximumSpacingTicks); //Slightly larger window so it doesn't stack with the visitors or the other too closely.
 				else
 					RebeccaLog("Rebecca decided not to.");
@@ -124,7 +125,8 @@ namespace RR
 							break;
 					}
 					var finalChance = popChance * i.Worker.BaseChanceThisGame;
-					RebeccaLog("Rebecca is considering sending \"" + i.defName + "\", with" + (popChance != 1 ? " population chance compensation of " + popChance + " and" : "") + " a base chance of " + i.Worker.BaseChanceThisGame + " for a final chance of " + finalChance + "..");
+					if (RebeccaSettings.IncidentSelectionLoggingEnabled)
+						RebeccaLog("Rebecca is considering sending \"" + i.defName + "\", with" + (popChance != 1 ? " population chance compensation of " + popChance + " and" : "") + " a base chance of " + i.Worker.BaseChanceThisGame + " for a final chance of " + finalChance + "..");
 					return finalChance;
 				}, out foundDef);
 			RebeccaLog("Rebecca has selected \"" + foundDef.defName + "\" from category \"" + iCatDef.defName + "\".");

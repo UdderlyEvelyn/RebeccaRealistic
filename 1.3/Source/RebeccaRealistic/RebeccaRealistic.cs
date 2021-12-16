@@ -58,7 +58,10 @@ namespace RR
             listingStandard.TextFieldNumericLabeled<float>("MTB Unit (Lower Means More Incidents)", ref RebeccaSettings.MTBUnit, ref _mtbUnitBuffer, 0f);
             listingStandard.TextFieldNumericLabeled<float>("High Threat Rarity Exponent (Higher Means Rarer)", ref RebeccaSettings.HighThreatRarityExponent, ref _highThreatRarityExponentBuffer, 2f);
             listingStandard.CheckboxLabeled("Enable Logging", ref RebeccaSettings.LoggingEnabled, "Turn on logging for Rebecca so you can read her mind in the debug log.");
+            listingStandard.CheckboxLabeled("Enable Log Nothings", ref RebeccaSettings.LogNothingsEnabled, "Enable logging for when nothing happens (e.g. \"Rebecca has decided to send nothing..\").");
+            listingStandard.CheckboxLabeled("Enable Incident Selection Logging", ref RebeccaSettings.IncidentSelectionLoggingEnabled, "Turn on logging for incident selection (e.g. \"Rebecca is considering sending[..]\".");
             listingStandard.End();
             base.DoSettingsWindowContents(inRect);
         }
     }
+}
