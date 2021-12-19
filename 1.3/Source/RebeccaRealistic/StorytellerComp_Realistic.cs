@@ -151,7 +151,9 @@ namespace RR
 								  (rollingForIncidentDef.tale != null && rollingForIncidentDef.tale.defName == "Raid");
 			bool rollingForManhunters = rollingForIncidentDef.Worker is IncidentWorker_ManhunterPack;
 			bool rollingForInfestation = rollingForIncidentDef.Worker is IncidentWorker_Infestation || 
-										 rollingForIncidentDef.Worker.def.defName == "IncidentWorker_BlackHive";
+										 rollingForIncidentDef.Worker.def.defName == "IncidentWorker_BlackHive" ||
+										 rollingForIncidentDef.Worker.def.defName == "BI_InsectRaid" ||
+										 (rollingForIncidentDef.tale != null && rollingForIncidentDef.tale.defName == "Infestation");
 			bool rollingForNeutralGroup = rollingForIncidentDef.Worker is IncidentWorker_NeutralGroup;
 			//Doesn't matter what we set here, but in case we ever get to the end without setting it for a raid,
 			//raids will error at $0 though work fine (there's a fallback system apparently), this avoids that just in case.
@@ -208,9 +210,13 @@ namespace RR
 				 *1m - 4.2k 
 				 */
 				//I ofc removed the needless 9742.433 nonsense.. lol
-				basePoints = 120.3303f/(float)(1+Math.Pow((double)wealth/1326793, .9796777)); 
+				basePoints = 120.3303f/(float)(1+Math.Pow((double)wealth/1326793, .9796777));
 				if (rollingForNeutralGroup) //If it's a neutral group..
-					basePoints = Math.Max(Rand.Range(100, basePoints), RebeccaSettings.VisitorMaxThreatPoints); //Let it drop as low as 100 randomly, cap it at a user setting that defaults at 3k.
+				{
+					RebeccaLog("Rebecca is rolling for a neutral group. Before adjusting the points she has: " + basePoints + ".");
+					basePoints = Math.Min(Rand.Range(100, basePoints), RebeccaSettings.VisitorMaxThreatPoints); //Let it drop as low as 100 randomly, cap it at a user setting that defaults at 3k.
+					RebeccaLog("Rebecca adjusted the points, now she has: " + basePoints + ".");
+				}
 			}
 			//if (!rollingForRaid)
 			//	basePoints += 1000 * Mathf.Pow(Rand.Value, RebeccaSettings.HighThreatRarityExponent);
@@ -220,7 +226,11 @@ namespace RR
 				basePoints = 4200 * Mathf.Pow(Rand.Value, RebeccaSettings.HighThreatRarityExponent);
 			}
 			if (!rollingForNeutralGroup)
+			{
+				RebeccaLog("Rebecca's pre-multiplier points are: " + basePoints + ".");
 				basePoints = Rand.Range(basePoints, basePoints * RebeccaSettings.ThreatPointsMultiplier); //Make it arbitrarily harder to represent how uncaring the universe is, but not necessarily always the multiplier, let it vary!
+				RebeccaLog("Rebecca's post-multiplier points are: " + basePoints + ".");
+			}
 			float pointsAdjustedForDifficulty = basePoints * Find.Storyteller.difficulty.threatScale; //Apply the user's settings, in case they're **INSANE** and set it higher than 100%.
 			RebeccaLog("Rebecca just calculated defaultThreatPointsNow " + 
 				(rollingForRaid ? "(rolling for a raid) " : "") +
