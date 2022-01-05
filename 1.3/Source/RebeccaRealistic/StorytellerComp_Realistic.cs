@@ -84,6 +84,8 @@ namespace RR
 					SendRandomWeightedIncidentFromCategory(iCatDefFactionArrival, target, RebeccaSettings.VisitorMinimumSpacingTicks, RebeccaSettings.VisitorMaximumSpacingTicks);
 			}
 
+			if (incident == null) //No usable incident was found for pool incident..
+				return blankList; //Abort.
 			RebeccaLog("Rebecca is sending \"" + incident.def.defName + "\" from the pool right now!");
 			return new FiringIncident[] { incident };
 		}
@@ -91,6 +93,8 @@ namespace RR
 		public void SendRandomWeightedIncidentFromCategory(IncidentCategoryDef iCatDef, IIncidentTarget target, int minTicks = 1250, int maxTicks = 2500)
         {
 			var incident = GetRandomWeightedIncidentFromCategory(iCatDef, target);
+			if (incident == null) //No usable incident was found..
+				return; //Abort.
 			incident.parms.points = defaultThreatPointsNow(target, incident.def); //Add in the *real* points now that the incident has been selected.
 			var firingDelay = Rand.Range(minTicks, maxTicks);
 			RebeccaLog("Rebecca is queuing \"" + incident.def.defName + "\" for " + firingDelay + " ticks from now.");
