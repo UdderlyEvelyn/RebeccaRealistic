@@ -17,6 +17,7 @@ namespace RR
         {
             Settings = GetSettings<RebeccaSettings>();
         }
+
         public override string SettingsCategory()
         {
             return "Rebecca Realistic";

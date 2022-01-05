@@ -104,8 +104,14 @@ namespace RR
 			//Evaluate the chance by pop curve as though you always have three colonists, giving it a "medium" sort of chance.
 			IncidentDef foundDef = null;
 			bool gotIncident = false;
+			var categoryIncidents = UsableIncidentsInCategory(iCatDef, parms);
+			if (categoryIncidents.Count() == 0)
+            {
+				RebeccaLog("Rebecca found no incidents for category \"" + iCatDef.defName + "\", so she will have to fire a null incident which will do nothing!");
+				return null;
+            }
 			while (!gotIncident)
-				gotIncident = UsableIncidentsInCategory(iCatDef, parms).TryRandomElementByWeight(i =>
+				gotIncident = categoryIncidents.TryRandomElementByWeight(i =>
 				{
 					if (i == null)
 						RebeccaLog("Rebecca is considering a null incident, oh jeez.. stop that!");
