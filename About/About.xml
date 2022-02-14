@@ -7,7 +7,7 @@
   </supportedVersions>
   <packageId>UdderlyEvelyn.RebeccaRealistic</packageId>
   <description>
-A storyteller that doesn't hold your hand. She doesn't care what's going on, she just does what she's going to do. The only thing that impacts what she sends is wealth, she doesn't care if you've had deaths, she doesn't care if you've only got one colonist, and she doesn't care if she just sent a raid.
+A storyteller that doesn't hold your hand - random where it should be, procedural where it shouldn't be.
   </description>
   <loadAfter>
     <li>Ludeon.RimWorld</li>

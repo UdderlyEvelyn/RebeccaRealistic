@@ -17,7 +17,7 @@ namespace RR
 		protected IncidentCategoryDef iCatDefOrbitalVisitor = DefDatabase<IncidentCategoryDef>.GetNamed("OrbitalVisitor");
 		protected IncidentCategoryDef iCatDefFactionArrival = DefDatabase<IncidentCategoryDef>.GetNamed("FactionArrival");
 		protected FiringIncident[] blankList = new FiringIncident[0];
-		protected static Dictionary<Map, MapComp_Realistic> mapCompCache = new Dictionary<Map, MapComp_Realistic>();
+		protected static Dictionary<Map, MapComponent_ConsideredWealth> mapCompCache = new Dictionary<Map, MapComponent_ConsideredWealth>();
 
 		protected StorytellerCompProperties_Realistic Props => (StorytellerCompProperties_Realistic)props;
 
@@ -31,8 +31,9 @@ namespace RR
 
         public static void RebeccaLog(string message)
         {
+			//Log.ResetMessageCount();
 			if (RebeccaSettings.LoggingEnabled)
-				Log.Message("[" + DateTime.Now.ToShortTimeString() + "] " + message);
+				Log.Message("[Rebecca Realistic] - " + DateTime.Now.ToShortTimeString() + ": " + message);
 		}
 
 		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
@@ -56,8 +57,9 @@ namespace RR
 				return blankList;
 			}
 			var incident = GetRandomWeightedIncidentFromCategory(iCatDef, target); //This will be sent at the end, but now we can check it during other things.
-			bool poolIncidentIsRaid = incident.def.Worker is IncidentWorker_RaidEnemy || (incident.def.tags != null && incident.def.tags.Contains("Raid")); //It's a raid, with option to be supported if you don't use the class as a third party..
-			incident.parms.points = defaultThreatPointsNow(target, incident.def); //Add in the *real* points now that the incident has been selected.
+			bool poolIncidentIsRaid = incident == null ? false : (incident.def.Worker is IncidentWorker_RaidEnemy || (incident.def.tags != null && incident.def.tags.Contains("Raid"))); //It's a raid, with option to be supported if you don't use the class as a third party..
+			if (incident != null) //Only calculate threatpoints if incident is valid.
+				incident.parms.points = defaultThreatPointsNow(target, incident.def); //Add in the *real* points now that the incident has been selected.
 
 			//Added chance of an additional incident of ThreatBig.
 			if (poolIncidentIsRaid)
@@ -98,7 +100,7 @@ namespace RR
 			incident.parms.points = defaultThreatPointsNow(target, incident.def); //Add in the *real* points now that the incident has been selected.
 			var firingDelay = Rand.Range(minTicks, maxTicks);
 			RebeccaLog("Rebecca is queuing \"" + incident.def.defName + "\" for " + firingDelay + " ticks from now.");
-			Current.Game.storyteller.incidentQueue.Add(new QueuedIncident(incident, Find.TickManager.TicksGame + firingDelay));
+			Current.Game.storyteller.incidentQueue.Add(new QueuedIncident(incident, Find.TickManager.TicksGame + firingDelay, 2500));
 		}
 
 		public FiringIncident GetRandomWeightedIncidentFromCategory(IncidentCategoryDef iCatDef, IIncidentTarget target)
@@ -191,13 +193,13 @@ namespace RR
 				float wealth = 0;
 				if (map != null)
 				{
-					MapComp_Realistic mapComp = null;
+					MapComponent_ConsideredWealth mapComp = null;
 					//Check cache.
 					if (mapCompCache.ContainsKey(map))
 						mapComp = mapCompCache[map];
 					else //Not cached, cache it.
 					{
-						mapComp = map.GetComponent<MapComp_Realistic>();
+						mapComp = map.GetComponent<MapComponent_ConsideredWealth>();
 						mapCompCache.Add(map, mapComp);
 					}
 					wealth = mapComp.ConsideredWealth;

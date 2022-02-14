@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using RimWorld;
 using Verse;
 using UnityEngine;
+using HarmonyLib;
 
 namespace RR
 {
@@ -15,6 +16,8 @@ namespace RR
 
         public RebeccaRealistic(ModContentPack content) : base(content)
         {
+            var harmony = new Harmony("UdderlyEvelyn.RebeccaRealistic");
+            harmony.PatchAll();
             Settings = GetSettings<RebeccaSettings>();
         }
 

@@ -9,20 +9,31 @@ using UnityEngine;
 
 namespace RR
 {
-    public class MapComp_Realistic : MapComponent
+    public class MapComponent_ConsideredWealth : MapComponent
     {
         public float ConsideredWealth = 0;
         public int LastUpdateTick = 0;
         public bool Initialized = false;
 
-        public MapComp_Realistic(Map map) : base(map)
+        public MapComponent_ConsideredWealth(Map map) : base(map)
         {
+            Log.Message("[Rebecca Realistic] New MapComponent_ConsideredWealth constructed (for map " + map.uniqueID + ") adding it to the cache.");
+            ConsideredWealthCompCache.SetFor(map, this);
+        }
 
+        public override void MapRemoved()
+        {
+            Log.Message("[Rebecca Realistic] Removing MapComponent_ConsideredWealth from cache due to map removal (for map " + map.uniqueID + ").");
+            ConsideredWealthCompCache.compCachePerMap.Remove(map.uniqueID); //Yeet from cache so it can die in the GC.
+        }
+
+        public override void MapGenerated()
+        {
+            Initialized = true; //Initialize on map generation so that we only fire the code to shove considered wealth up to 95% of total on loaded pre-existing saves.
         }
 
         public override void MapComponentTick()
         {
-
             var currentTick = Find.TickManager.TicksGame;
             var ticksSinceLastUpdate = currentTick - LastUpdateTick;
             if (!Initialized && (LastUpdateTick == 0 && currentTick > 60000)) //This should only fire if Rebecca is enabled on a save that didn't have her before.

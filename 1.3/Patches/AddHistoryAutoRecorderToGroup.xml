@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+
+    <Operation Class="PatchOperationAdd">
+        <xpath>/Defs/HistoryAutoRecorderGroupDef[defName="Wealth"]/historyAutoRecorderDefs</xpath>
+	<value>
+		<li>Wealth_Considered</li>
+	</value>
+    </Operation>
+
+</Patch>

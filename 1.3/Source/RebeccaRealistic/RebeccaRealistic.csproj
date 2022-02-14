@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\..\..\0Harmony.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -49,7 +53,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MapComp_Realistic.cs" />
+    <Compile Include="ConsideredWealthCompCache.cs" />
+    <Compile Include="Harmony Patches\MainTabWindow_History_DoStatisticsPage.cs" />
+    <Compile Include="Harmony Patches\MainTabWindow_History_DoGraphPage.cs" />
+    <Compile Include="Harmony Patches\SimpleCurveDrawer_DrawCurveMousePoint.cs" />
+    <Compile Include="HistoryAutoRecorderWorker_ConsideredWealth.cs" />
+    <Compile Include="MapComponent_ConsideredWealth.cs" />
     <Compile Include="RebeccaRealistic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RebeccaSettings.cs" />

@@ -12,7 +12,7 @@ namespace RR
     {
         public static float DelayedWealthEffectPerDay = .1f;
         public static float TwoAtOnceThreatBigChance = .3f;
-        public static float BaseBonusThreatBigChance = .1f;
+        public static float BaseBonusThreatBigChance = .06f; //Used to be .1f for most of Rebecca's in-dev life, then .07f for public testing stuff, .06f for release.
         public static float BonusThreatBigChancePerWealthChance = .01f;
         public static float BonusThreatBigChancePerWealthThreshold = 10000f;
         public static int BonusThreatBigMinimumSpacingTicks = 2500;
