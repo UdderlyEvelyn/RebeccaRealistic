@@ -65,7 +65,7 @@ namespace RR
 			if (!poolIncidentIsRaid || (poolIncidentIsRaid && Rand.Chance(RebeccaSettings.TwoAtOnceThreatBigChance)))			{
 				if (poolIncidentIsRaid)
 					RebeccaLog("Rebecca decided you needed another ThreatBig at the same time - isn't she thoughtful?");
-				var bonusBigThreatChance = (RebeccaSettings.BaseBonusThreatBigChance + (RebeccaSettings.BonusThreatBigChancePerWealthChance * (target.PlayerWealthForStoryteller / RebeccaSettings.BonusThreatBigChancePerWealthThreshold)));
+				var bonusBigThreatChance = (RebeccaSettings.BaseBonusThreatBigChance + (RebeccaSettings.BonusThreatBigChancePerWealthChance * (wealthForTarget(target) / RebeccaSettings.BonusThreatBigChancePerWealthThreshold)));
 					RebeccaLog("Rebecca is considering sending an extra ThreatBig, chance is: " + Math.Round(100 * bonusBigThreatChance, 2) + "%");
 				if (Rand.Chance(bonusBigThreatChance)) //10% chance of big incident tacked on plus another 10% per 10k wealth.
 					SendRandomWeightedIncidentFromCategory(iCatDefThreatBig, target, RebeccaSettings.BonusThreatBigMinimumSpacingTicks, RebeccaSettings.BonusThreatBigMaximumSpacingTicks); //Slightly larger window so it doesn't stack with the visitors or the other too closely.
@@ -153,6 +153,19 @@ namespace RR
 			return new IncidentParms { target = target, points = 35 };
 		}
 
+		public static float wealthForTarget(IIncidentTarget target)
+        {
+			float wealth = 0;
+			if (target is Map map) //If it's a map..
+				wealth = ConsideredWealthCompCache.GetFor(map).ConsideredWealth;
+			else //If it's not a map (what is it? lol..)
+			{
+				wealth = target.PlayerWealthForStoryteller;
+				RebeccaLog("Rebecca found a non-Map target, it's a \"" + target.GetType().FullName + "\"!");
+			}
+			return wealth;
+		}
+
 		//Copypasta from StorytellerUtility w/ modifications to yeet features we don't want.
 		protected static float defaultThreatPointsNow(IIncidentTarget target, IncidentDef rollingForIncidentDef)
 		{
@@ -188,14 +201,7 @@ namespace RR
 			{
 				RebeccaLog("Rebecca is targeting \"" + target + "\" with a raid or neutral group.");
 				//If the target's a map, get our MapComp and use the lerped wealth rather than the raw one, otherwise use raw one.
-				float wealth = 0;
-				if (target is Map map) //If it's a map..
-					wealth = ConsideredWealthCompCache.GetFor(map).ConsideredWealth;
-				else //If it's not a map (what is it? lol..)
-				{
-					wealth = target.PlayerWealthForStoryteller;
-					RebeccaLog("Rebecca found a non-Map target, it's a \"" + target.GetType().FullName + "\"!");
-				}
+				float wealth = wealthForTarget(target);
 				RebeccaLog("Rebecca is looking at your wealth, the world is aware of $" + wealth);
 				//y=9742.433+(120.3303-9742.433)/(1+(x/1326793)^.9796777) per mycurvefit.com in symmetrical sigmoidal mode
 				//for the points I plugged (partly based on vanilla curve):
@@ -224,13 +230,14 @@ namespace RR
 				RebeccaLog("Rebecca doesn't know what a \"" + rollingForIncidentDef.defName + "\" is, so she's gonna use a curved RNG to determine points!");
 				basePoints = 4200 * Mathf.Pow(Rand.Value, RebeccaSettings.HighThreatRarityExponent);
 			}
+			basePoints *= .6f; //Adjust to 60% of it since I balanced at Adventure Story difficulty to re-tune it for Strive to Survive.
 			if (!rollingForNeutralGroup)
 			{
 				RebeccaLog("Rebecca's pre-multiplier points are: " + basePoints + ".");
 				basePoints = Rand.Range(basePoints, basePoints * RebeccaSettings.ThreatPointsMultiplier); //Make it arbitrarily harder to represent how uncaring the universe is, but not necessarily always the multiplier, let it vary!
 				RebeccaLog("Rebecca's post-multiplier points are: " + basePoints + ".");
 			}
-			float pointsAdjustedForDifficulty = basePoints * Find.Storyteller.difficulty.threatScale; //Apply the user's settings, in case they're **INSANE** and set it higher than 100%.
+			float pointsAdjustedForDifficulty = basePoints * Find.Storyteller.difficulty.threatScale; //Apply the user's threat scale setting..
 			RebeccaLog("Rebecca just calculated defaultThreatPointsNow " + 
 				(rollingForRaid ? "(rolling for a raid) " : "") +
 				(rollingForManhunters ? "(rolling for a manhunter pack) " : "") +
