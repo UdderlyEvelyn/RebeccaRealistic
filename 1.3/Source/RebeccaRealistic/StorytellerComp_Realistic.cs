@@ -12,12 +12,10 @@ namespace RR
 {
 	public class StorytellerComp_Realistic : StorytellerComp
     {
-		protected static float consideredPlayerWealth = 0;
 		protected IncidentCategoryDef iCatDefThreatBig = DefDatabase<IncidentCategoryDef>.GetNamed("ThreatBig");
 		protected IncidentCategoryDef iCatDefOrbitalVisitor = DefDatabase<IncidentCategoryDef>.GetNamed("OrbitalVisitor");
 		protected IncidentCategoryDef iCatDefFactionArrival = DefDatabase<IncidentCategoryDef>.GetNamed("FactionArrival");
 		protected FiringIncident[] blankList = new FiringIncident[0];
-		protected static Dictionary<Map, MapComponent_ConsideredWealth> mapCompCache = new Dictionary<Map, MapComponent_ConsideredWealth>();
 
 		protected StorytellerCompProperties_Realistic Props => (StorytellerCompProperties_Realistic)props;
 
@@ -188,23 +186,12 @@ namespace RR
 				}); //50 points per heartbeat.
 			else if (rollingForRaid || rollingForNeutralGroup)
 			{
+				RebeccaLog("Rebecca is targeting \"" + target + "\" with a raid or neutral group.");
 				//If the target's a map, get our MapComp and use the lerped wealth rather than the raw one, otherwise use raw one.
-				var map = target as Map;
 				float wealth = 0;
-				if (map != null)
-				{
-					MapComponent_ConsideredWealth mapComp = null;
-					//Check cache.
-					if (mapCompCache.ContainsKey(map))
-						mapComp = mapCompCache[map];
-					else //Not cached, cache it.
-					{
-						mapComp = map.GetComponent<MapComponent_ConsideredWealth>();
-						mapCompCache.Add(map, mapComp);
-					}
-					wealth = mapComp.ConsideredWealth;
-				}
-				else
+				if (target is Map map) //If it's a map..
+					wealth = ConsideredWealthCompCache.GetFor(map).ConsideredWealth;
+				else //If it's not a map (what is it? lol..)
 				{
 					wealth = target.PlayerWealthForStoryteller;
 					RebeccaLog("Rebecca found a non-Map target, it's a \"" + target.GetType().FullName + "\"!");
