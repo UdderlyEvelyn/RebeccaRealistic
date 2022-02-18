@@ -214,8 +214,7 @@ namespace RR
 				 *700k - 3.6k
 				 *1m - 4.2k 
 				 */
-				//I ofc removed the needless 9742.433 nonsense.. lol
-				basePoints = 120.3303f/(float)(1+Math.Pow((double)wealth/1326793, .9796777));
+				basePoints = 9742.433f+(120.3303f-9742.433f)/(float)(1f+Math.Pow((double)wealth/1326793f, .9796777f));
 				if (rollingForNeutralGroup) //If it's a neutral group..
 				{
 					RebeccaLog("Rebecca is rolling for a neutral group. Before adjusting the points she has: " + basePoints + ".");
