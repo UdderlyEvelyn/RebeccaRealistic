@@ -58,6 +58,7 @@
     <Compile Include="Harmony Patches\MainTabWindow_History_DoGraphPage.cs" />
     <Compile Include="Harmony Patches\SimpleCurveDrawer_DrawCurveMousePoint.cs" />
     <Compile Include="HistoryAutoRecorderWorker_ConsideredWealth.cs" />
+    <Compile Include="WorldComponent_ConsideredWealth.cs" />
     <Compile Include="MapComponent_ConsideredWealth.cs" />
     <Compile Include="RebeccaRealistic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

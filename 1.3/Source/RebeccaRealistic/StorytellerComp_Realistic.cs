@@ -156,12 +156,15 @@ namespace RR
 		public static float wealthForTarget(IIncidentTarget target)
         {
 			float wealth = 0;
-			if (target is Map map) //If it's a map..
+			if (target is Map map)
 				wealth = ConsideredWealthCompCache.GetFor(map).ConsideredWealth;
-			else //If it's not a map (what is it? lol..)
+			else if (target is World)
+				wealth = WorldComponent_ConsideredWealth.Instance.ConsideredWealth;
+			else //It's probably a caravan, we don't do considered wealth for those.
 			{
 				wealth = target.PlayerWealthForStoryteller;
-				RebeccaLog("Rebecca found a non-Map target, it's a \"" + target.GetType().FullName + "\"!");
+				if (!(target is Caravan)) //If it's not a caravan..
+					RebeccaLog("Rebecca found an unfamiliar target, it's a \"" + target.GetType().FullName + "\"!"); //Log it so we can learn about it maybe someday.
 			}
 			return wealth;
 		}
